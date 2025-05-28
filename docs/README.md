@@ -1,9 +1,10 @@
-# CropPulse Hackathon1
+
 
 # Introduction and Datasets
 
-- link goes here
+https://croppulse.github.io/CropPulse-Hackathon1/introduction
 
 # GCP implementation
 
-- link goes here
+
+https://croppulse.github.io/CropPulse-Hackathon1/GCP
