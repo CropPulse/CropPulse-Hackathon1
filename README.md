@@ -18,6 +18,9 @@ Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high
 *   **NDWI (Normalized Difference Water Index):** A measure of vegetation water content, calculated as (Green - NIR) / (Green + NIR), where Green is the green band (B3) and NIR is the near-infrared band (B8). NDWI values range from -1 to 1, with higher values indicating greater vegetation water content.
 *   **NDCSI (Normalized Difference Clay Soil Index):** A measure of clay mineral content, calculated as (SWIR1 - SWIR2) / (SWIR1 + SWIR2), where SWIR1 is the shortwave infrared band (B11) and SWIR2 is the shortwave infrared band (B12). NDCSI values range from -1 to 1.
 
+> ![grafik](https://github.com/user-attachments/assets/232c1c82-35f4-42f6-b0dd-ddf0d9850598)
+> layers in earth engine web interface
+ 
 The "WorldCereal 10 m 2021" product suite from the European Space Agency (ESA) consists of annual and seasonal cereal maps at a global level and the associated confidence intervals. These were generated as part of the ESA-WorldCereal project.
 
 This collection contains up to 106 images for each agro-ecological zone (AEZ), all processed taking into account the respective regional seasonality and should be considered as stand-alone products.
@@ -29,7 +32,8 @@ WorldCereal Seasons:
 *   tc-springcereals: optional season for spring cereals, only defined in certain time zones
 *   tc-maize-main: the main maize season defined in an AEZ
 *   tc-maize-second: optional second maize season, only defined in certain AEZs
-
+![grafik](https://github.com/user-attachments/assets/160d0c55-e81d-4c96-99db-7a9b734e0517)
+> WorldCereal in earth engine
 Available products:
 
 *   temporarycrops
@@ -134,11 +138,9 @@ Map.addLayer(ndvi.clip(roi), ndviVisParams, 'NDVI (1 Hectare)');
 Map.addLayer(ndwi.clip(roi), ndwiVisParams, 'NDWI (1 Hectare)');
 Map.addLayer(ndcsi.clip(roi), ndcsiVisParams, 'NDCSI (1 Hectare)');
 ```
-
-![WorldCereal Layers](https://github.com/user-attachments/assets/cab1443a-e8a1-4d21-8457-c1c4fec6e26f)
-
-![NDVI Layer](https://github.com/user-attachments/assets/e75c1d02-010d-4185-a412-1d8a262e3d51)
-
+![grafik](https://github.com/user-attachments/assets/1e1a7f72-e49e-4aa9-924b-c90ecad936d1)
+> layer parameters
+> 
 ## 3. Data Sources
 
 *   **Sentinel-2:** Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high-resolution optical imagery of the Earth's surface. We use Sentinel-2 data to extract vegetation indices that are indicative of crop health.
