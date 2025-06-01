@@ -32,6 +32,7 @@ var roi = ee.Geometry.Polygon(
           [9.0, 50.5],
           [9.0, 52.5],
           [6.0, 52.5]]]);
+var hectareTile = roi;
 var s2Collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                   .filter(ee.Filter.date('2018-05-01', '2018-05-08'))
                   .filterBounds(hectareTile);
