@@ -10,6 +10,16 @@ Crop loss prediction is crucial for food security and agricultural planning. By 
 
 This section provides JavaScript code to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. You can use this code in the Google Earth Engine Code Editor: https://code.earthengine.google.com
 
+Google Earth Engine is a cloud-based platform for processing satellite imagery and other geospatial data. In this project, we use Sentinel-2 satellite imagery to calculate vegetation indices that are indicative of crop health.
+
+Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high-resolution optical imagery of the Earth's surface. Sentinel-2 provides 13 spectral bands in the visible, near-infrared, and shortwave infrared regions of the electromagnetic spectrum. These bands can be used to calculate various vegetation indices, such as NDVI, NDWI, and NDCSI.
+
+*   **NDVI (Normalized Difference Vegetation Index):** A measure of vegetation greenness, calculated as (NIR - Red) / (NIR + Red), where NIR is the near-infrared band (B8) and Red is the red band (B4). NDVI values range from -1 to 1, with higher values indicating greater vegetation greenness.
+*   **NDWI (Normalized Difference Water Index):** A measure of vegetation water content, calculated as (Green - NIR) / (Green + NIR), where Green is the green band (B3) and NIR is the near-infrared band (B8). NDWI values range from -1 to 1, with higher values indicating greater vegetation water content.
+*   **NDCSI (Normalized Difference Clay Soil Index):** A measure of clay mineral content, calculated as (SWIR1 - SWIR2) / (SWIR1 + SWIR2), where SWIR1 is the shortwave infrared band (B11) and SWIR2 is the shortwave infrared band (B12). NDCSI values range from -1 to 1.
+
+The following JavaScript code shows how to calculate these indices using the Google Earth Engine API:
+
 ```javascript
 // Initialize Earth Engine
 ee.initialize();
@@ -251,7 +261,16 @@ Key concepts in gradient boosting:
 *   **Weak Learners:** Simple models (e.g., decision trees with limited depth) that perform slightly better than random guessing.
 *   **Ensemble:** A collection of weak learners that work together to make predictions.
 *   **Sequential Training:** Models are trained sequentially, with each new model focusing on the errors made by previous models.
-*   **Loss Function:** A function that measures the difference between the predicted values and the actual values. The goal of gradient boosting is to minimize this loss function.
+*   **Loss Function:** A function that measures the difference between the predicted values and the actual values. The goal of gradient boosting is to minimize this loss function. Common loss functions include Mean Squared Error (MSE) for regression tasks and Log Loss for classification tasks.
+
+The gradient boosting algorithm works as follows:
+
+1.  Initialize the model with a constant value (e.g., the mean of the target variable).
+2.  For each iteration:
+    *   Calculate the residuals (the difference between the actual values and the predicted values).
+    *   Train a weak learner (e.g., a decision tree) to predict the residuals.
+    *   Update the model by adding the predictions of the weak learner, scaled by a learning rate. The learning rate controls the contribution of each weak learner to the overall model.
+3.  Repeat steps 2 until a stopping criterion is met (e.g., a maximum number of iterations or a minimum improvement in the loss function).
 
 Here's a Mermaid diagram illustrating the gradient boosting process:
 
