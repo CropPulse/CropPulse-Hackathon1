@@ -354,15 +354,8 @@ print('Output of LightGBM Model training..')
 
 We evaluate the model's performance using the Mean Squared Error (MSE) metric. MSE measures the average squared difference between the predicted crop losses and the actual crop losses.
 
-Here's a Mermaid diagram illustrating the model evaluation process:
+![grafik](https://github.com/user-attachments/assets/06f72524-bb7a-499a-997b-bea667ca2393)
 
-```mermaid
-graph LR
-    A[Trained Model] --> B{Make Predictions};
-    C[Actual Crop Loss] --> D{Calculate MSE};
-    B --> D;
-    D --> E[MSE Value];
-```
 
 **Code Example:**
 
