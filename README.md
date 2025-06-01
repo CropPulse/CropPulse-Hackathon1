@@ -18,22 +18,20 @@ Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high
 *   **NDWI (Normalized Difference Water Index):** A measure of vegetation water content, calculated as (Green - NIR) / (Green + NIR), where Green is the green band (B3) and NIR is the near-infrared band (B8). NDWI values range from -1 to 1, with higher values indicating greater vegetation water content.
 *   **NDCSI (Normalized Difference Clay Soil Index):** A measure of clay mineral content, calculated as (SWIR1 - SWIR2) / (SWIR1 + SWIR2), where SWIR1 is the shortwave infrared band (B11) and SWIR2 is the shortwave infrared band (B12). NDCSI values range from -1 to 1.
 
-The following JavaScript code shows how to calculate these indices using the Google Earth Engine API:
+The following JavaScript code shows how to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. This code needs to be adapted to properly display our layers.
 
 ```javascript
-// Initialize Earth Engine
-ee.initialize();
-
 var centerLon = 8.10; // Example longitude
 var centerLat = 51.55; // Example latitude
 var sideLengthMeters = 100;
 var halfSideMeters = sideLengthMeters / 2;
 var latOffsetDegrees = halfSideMeters / 111320;
 var lonOffsetDegrees = halfSideMeters / (111320 * Math.cos(centerLat * Math.PI/180));
-var hectareTile = ee.Geometry.Rectangle([
-  centerLon - lonOffsetDegrees, centerLat - latOffsetDegrees,
-  centerLon + lonOffsetDegrees, centerLat + latOffsetDegrees
-]);
+var roi = ee.Geometry.Polygon(
+        [[[6.0, 50.5],
+          [9.0, 50.5],
+          [9.0, 52.5],
+          [6.0, 52.5]]]);
 var s2Collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                   .filter(ee.Filter.date('2018-05-01', '2018-05-08'))
                   .filterBounds(hectareTile);
@@ -63,6 +61,19 @@ var s2ValuesHectare = medianS2Image.reduceRegion({
 Map.centerObject(hectareTile, 17); // Strong zoom to the tile
 Map.addLayer(hectareTile, {color: 'FFFF00'}, '1 Hectare Tile Border (S2)'); // Yellow border
 Map.addLayer(s2HectareVis, s2VisParams, 'Sentinel-2 (1 Hectare)');
+
+var ndvi = medianS2Image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+var ndwi = medianS2Image.normalizedDifference(['B3', 'B8']).rename('NDWI');
+var ndcsi = medianS2Image.normalizedDifference(['B11', 'B12']).rename('NDCSI');
+
+var ndviVisParams = {min: -1, max: 1, palette: ['red', 'yellow', 'green']};
+var ndwiVisParams = {min: -1, max: 1, palette: ['blue', 'white', 'green']};
+var ndcsiVisParams = {min: -1, max: 1, palette: ['brown', 'white', 'green']};
+
+Map.addLayer(ndvi.clip(hectareTile), ndviVisParams, 'NDVI (1 Hectare)');
+Map.addLayer(ndwi.clip(hectareTile), ndwiVisParams, 'NDWI (1 Hectare)');
+Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
+
 print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare)
 ```
 
