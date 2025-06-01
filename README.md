@@ -265,7 +265,8 @@ sentinel2_ndcsi = sentinel2.map(calculate_ndcsi)
 *   The target variable (crop loss) is transformed using a logarithmic transformation (np.log1p) to handle skewed distributions.
 *   The data is split into training and validation sets to evaluate the model's performance.
 
-Here's a Mermaid diagram illustrating the data preparation process:
+![grafik](https://github.com/user-attachments/assets/38e165a2-c83f-4cd5-8ee1-5a4f362c29f6)
+
 
 ```mermaid
 graph LR
