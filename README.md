@@ -80,6 +80,10 @@ print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare)
 ![grafik](https://github.com/user-attachments/assets/cab1443a-e8a1-4d21-8457-c1c4fec6e26f)
 > our layers in earth engine web interface
 
+![grafik](https://github.com/user-attachments/assets/e75c1d02-010d-4185-a412-1d8a262e3d51)
+> NDVI
+
+
 ## 3. Data Sources
 
 *   **Sentinel-2:** Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high-resolution optical imagery of the Earth's surface. We use Sentinel-2 data to extract vegetation indices that are indicative of crop health.
