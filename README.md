@@ -187,14 +187,8 @@ The crop loss prediction process involves the following steps:
 *   **Sentinel-2 Data:** We acquire Sentinel-2 imagery for the region of interest (Nord Rhine-Westphalia in this case) and a specific time period (e.g., 2020-2021).
 *   **Crop Loss Data:** We obtain crop loss data for the same region and time period. This data should ideally be in a format that can be linked to the Sentinel-2 imagery (e.g., by location).
 
-Here's a Mermaid diagram illustrating the data acquisition process:
+![grafik](https://github.com/user-attachments/assets/91767b6b-5c92-4fab-88aa-277dc97e7962)
 
-```mermaid
-graph LR
-    A[Sentinel-2 Imagery] --> B(Region of Interest);
-    C[Crop Loss Data] --> B;
-    B --> D{Combined Data};
-```
 
 **Code Example:**
 
