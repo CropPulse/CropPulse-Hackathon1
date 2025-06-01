@@ -22,6 +22,9 @@ Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high
 ![grafik](https://github.com/user-attachments/assets/cab1443a-e8a1-4d21-8457-c1c4fec6e26f)
 > our layers in earth engine web interface
 
+![grafik](https://github.com/user-attachments/assets/5ca2c51e-5f75-463e-a5fd-d093bf5438a0)
+> earth engine layer parameters
+
 The following JavaScript code shows how to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. This code needs to be adapted to properly display our layers.
 
 ```javascript
