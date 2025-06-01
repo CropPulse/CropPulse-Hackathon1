@@ -77,6 +77,8 @@ Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
 
 print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare)
 ```
+![grafik](https://github.com/user-attachments/assets/cab1443a-e8a1-4d21-8457-c1c4fec6e26f)
+
 
 ## 3. Data Sources
 
