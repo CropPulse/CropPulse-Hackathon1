@@ -309,16 +309,8 @@ The gradient boosting algorithm works as follows:
     *   Update the model by adding the predictions of the weak learner, scaled by a learning rate. The learning rate controls the contribution of each weak learner to the overall model.
 3.  Repeat steps 2 until a stopping criterion is met (e.g., a maximum number of iterations or a minimum improvement in the loss function).
 
-Here's a Mermaid diagram illustrating the gradient boosting process:
+![grafik](https://github.com/user-attachments/assets/51feeb6c-16fd-4ca1-b27f-848cb84247c1)
 
-```mermaid
-graph LR
-    A[Initial Model] --> B{Calculate Errors};
-    B --> C[Train New Model on Errors];
-    C --> D{Combine Models};
-    D --> E[Improved Model];
-    E --> B;
-```
 
 **Code Example:**
 
