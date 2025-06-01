@@ -268,15 +268,7 @@ sentinel2_ndcsi = sentinel2.map(calculate_ndcsi)
 ![grafik](https://github.com/user-attachments/assets/38e165a2-c83f-4cd5-8ee1-5a4f362c29f6)
 
 
-```mermaid
-graph LR
-    A[NDVI] --> B{Combine with Crop Loss Data};
-    C[NDWI] --> B;
-    D[NDCSI] --> B;
-    B --> E[Pandas DataFrame];
-    E --> F(Log Transformation);
-    F -->|Split| G(Train/Validation Split);
-```
+
 
 **Code Example:**
 
