@@ -18,10 +18,6 @@ Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high
 *   **NDWI (Normalized Difference Water Index):** A measure of vegetation water content, calculated as (Green - NIR) / (Green + NIR), where Green is the green band (B3) and NIR is the near-infrared band (B8). NDWI values range from -1 to 1, with higher values indicating greater vegetation water content.
 *   **NDCSI (Normalized Difference Clay Soil Index):** A measure of clay mineral content, calculated as (SWIR1 - SWIR2) / (SWIR1 + SWIR2), where SWIR1 is the shortwave infrared band (B11) and SWIR2 is the shortwave infrared band (B12). NDCSI values range from -1 to 1.
 
-
-![grafik](https://github.com/user-attachments/assets/cab1443a-e8a1-4d21-8457-c1c4fec6e26f)
-> our layers in earth engine web interface
-
 The following JavaScript code shows how to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. This code needs to be adapted to properly display our layers.
 
 ```javascript
@@ -67,6 +63,12 @@ Map.centerObject(hectareTile, 17); // Strong zoom to the tile
 Map.addLayer(hectareTile, {color: 'FFFF00'}, '1 Hectare Tile Border (S2)'); // Yellow border
 Map.addLayer(s2HectareVis, s2VisParams, 'Sentinel-2 (1 Hectare)');
 
+var worldCereal = ee.ImageCollection("ESA/WorldCereal/2021/V100").filter(ee.Filter.eq('aez_id', 6)).filter(ee.Filter.eq('product', 'temporarycrops')).filter(ee.Filter.eq('season', 'tc-annual')).first()
+
+var wcVisParams = {min: 0, max: 100, palette: ['black', 'green']};
+
+Map.addLayer(worldCereal.clip(hectareTile), wcVisParams, 'WorldCereal (1 Hectare)');
+
 var ndvi = medianS2Image.normalizedDifference(['B8', 'B4']).rename('NDVI');
 var ndwi = medianS2Image.normalizedDifference(['B3', 'B8']).rename('NDWI');
 var ndcsi = medianS2Image.normalizedDifference(['B11', 'B12']).rename('NDCSI');
@@ -82,20 +84,37 @@ Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
 print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare)
 ```
 
-![grafik](https://github.com/user-attachments/assets/e75c1d02-010d-4185-a412-1d8a262e3d51)
-> NDVI
-
-
-
-![grafik](https://github.com/user-attachments/assets/5ca2c51e-5f75-463e-a5fd-d093bf5438a0)
-> earth engine layer parameters
-
-
-
 ## 3. Data Sources
 
 *   **Sentinel-2:** Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high-resolution optical imagery of the Earth's surface. We use Sentinel-2 data to extract vegetation indices that are indicative of crop health.
 *   **Crop Loss Data:** This is the ground truth data representing actual crop losses in the region of interest. This data is essential for training the machine learning model.
+*   **WorldCereal 10 m 2021:** The "WorldCereal 10 m 2021" product suite from the European Space Agency (ESA) consists of annual and seasonal cereal maps at a global level and the associated confidence intervals. These were generated as part of the ESA-WorldCereal project.
+
+    This collection contains up to 106 images for each agro-ecological zone (AEZ), all processed taking into account the respective regional seasonality and should be considered as stand-alone products.
+
+    WorldCereal Seasons:
+
+    *   tc-annual: An annual cycle, defined up to the end of the last vegetation period considered in an AEZ
+    *   tc-wintercereals: the main cereal season in an AEZ
+    *   tc-springcereals: optional season for spring cereals, only defined in certain time zones
+    *   tc-maize-main: the main maize season defined in an AEZ
+    *   tc-maize-second: optional second maize season, only defined in certain AEZs
+
+    Available products:
+
+    *   temporarycrops
+    *   Maize
+    *   wintercereals
+    *   springcereals
+    *   Irrigation
+
+    Each product (image) has a binary classification (0 or 100) and a confidence range (0–100).
+
+    The collection should be filtered with one or more of the following image properties:
+
+    *   "aez_id", the ID of the AEZ to which the image belongs
+    *   product, which describes the "WorldCereal" product name of the image
+    *   season, which describes the season for which the image is valid.
 
 ## 4. Methodology
 
