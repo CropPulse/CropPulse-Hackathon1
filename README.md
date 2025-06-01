@@ -10,7 +10,7 @@ Crop loss prediction is crucial for food security and agricultural planning. By 
 
 This section provides JavaScript code to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. You can use this code in the Google Earth Engine Code Editor: https://code.earthengine.google.com
 
-Google Earth Engine is a cloud-based platform for processing satellite imagery and other geospatial data. In this project, we use Sentinel-2 satellite imagery to calculate vegetation indices that are indicative of crop health.
+Google Earth Engine is a cloud-based platform for processing satellite imagery and other geospatial data. In this project, we use Sentinel-2 satellite imagery to calculate vegetation indices that are indicative of crop health. We also incorporate the WorldCereal dataset to provide additional information about crop types and seasonality.
 
 Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high-resolution optical imagery of the Earth's surface. Sentinel-2 provides 13 spectral bands in the visible, near-infrared, and shortwave infrared regions of the electromagnetic spectrum. These bands can be used to calculate various vegetation indices, such as NDVI, NDWI, and NDCSI.
 
@@ -18,24 +18,95 @@ Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high
 *   **NDWI (Normalized Difference Water Index):** A measure of vegetation water content, calculated as (Green - NIR) / (Green + NIR), where Green is the green band (B3) and NIR is the near-infrared band (B8). NDWI values range from -1 to 1, with higher values indicating greater vegetation water content.
 *   **NDCSI (Normalized Difference Clay Soil Index):** A measure of clay mineral content, calculated as (SWIR1 - SWIR2) / (SWIR1 + SWIR2), where SWIR1 is the shortwave infrared band (B11) and SWIR2 is the shortwave infrared band (B12). NDCSI values range from -1 to 1.
 
+The "WorldCereal 10 m 2021" product suite from the European Space Agency (ESA) consists of annual and seasonal cereal maps at a global level and the associated confidence intervals. These were generated as part of the ESA-WorldCereal project.
+
+This collection contains up to 106 images for each agro-ecological zone (AEZ), all processed taking into account the respective regional seasonality and should be considered as stand-alone products.
+
+WorldCereal Seasons:
+
+*   tc-annual: An annual cycle, defined up to the end of the last vegetation period considered in an AEZ
+*   tc-wintercereals: the main cereal season in an AEZ
+*   tc-springcereals: optional season for spring cereals, only defined in certain time zones
+*   tc-maize-main: the main maize season defined in an AEZ
+*   tc-maize-second: optional second maize season, only defined in certain AEZs
+
+Available products:
+
+*   temporarycrops
+*   Maize
+*   wintercereals
+*   springcereals
+*   Irrigation
+
+Each product (image) has a binary classification (0 or 100) and a confidence range (0–100).
+
+The collection should be filtered with one or more of the following image properties:
+
+*   "aez_id", the ID of the AEZ to which the image belongs
+*   product, which describes the "WorldCereal" product name of the image
+*   season, which describes the season for which the image is valid.
+
 The following JavaScript code shows how to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. This code needs to be adapted to properly display our layers.
 
 ```javascript
-var centerLon = 8.00; // Example longitude
-var centerLat = 50.00; // Example latitude
-var sideLengthMeters = 100;
-var halfSideMeters = sideLengthMeters / 2;
-var latOffsetDegrees = halfSideMeters / 111320;
-var lonOffsetDegrees = halfSideMeters / (111320 * Math.cos(centerLat * Math.PI/180));
+var dataset = ee.ImageCollection('ESA/WorldCereal/2021/MODELS/v100');
+
+// Set satellite background
+Map.setOptions('SATELLITE');
+
+// Typically we'd want to mask the "other" class (value 0)
+// in the images
+function mask_other(img) {
+  return img.updateMask(img.neq(0));
+}
+
+// Apply the mask_other function to the collection
+dataset = dataset.map(mask_other);
+
+/*--------------------------------------------------
+Basic example for a global mosaic of temporary crops
+--------------------------------------------------*/
+
+// Define region of interest (Nord Rhine-Westphalia)
 var roi = ee.Geometry.Polygon(
         [[[6.0, 50.5],
           [9.0, 50.5],
           [9.0, 52.5],
           [6.0, 52.5]]]);
-var hectareTile = roi;
+
+// Get a global mosaic for all agro-ecological zone (AEZ) of temporary crops
+var temporarycrops = dataset.filter(ee.Filter.eq('product', 'temporarycrops'))
+                            .filter(ee.Filter.eq('aez_id', 46172))
+                            .filter(ee.Filter.eq('season', 'tc-annual'))
+                            .mosaic();
+
+// Visualization specifics
+var visualization_class = {
+  bands: ["classification"],
+  max: 100,
+  palette: ["ff0000"]
+};
+
+var visualization_conf = {
+  bands: ['confidence'],
+  min: [0],
+  max: [100],
+  palette: ['be0000','fff816','069711'],
+};
+
+// Show global classification mosaic
+Map.centerObject(roi, 9);
+Map.addLayer(temporarycrops.clip(roi), visualization_class, 'Temporary crops');
+
+// By default don't show confidence layer
+Map.addLayer(
+    temporarycrops.clip(roi), visualization_conf, 'Temporary crops confidence', false);
+
+// Load Sentinel-2 data
 var s2Collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                   .filter(ee.Filter.date('2018-05-01', '2018-05-08'))
-                  .filterBounds(hectareTile);
+                  .filterBounds(roi);
+
 function maskS2clouds(image) {
   var qa = image.select('QA60');
   var cloudBitMask = 1 << 10;
@@ -46,32 +117,11 @@ function maskS2clouds(image) {
               .select("B.*")
               .copyProperties(image, ["system:time_start"]);
 }
+
 var s2CloudMasked = s2Collection.map(maskS2clouds);
 var medianS2Image = s2CloudMasked.median(); // Takes the median of each pixel over time
-var s2VisParams = {
-  bands: ['B4', 'B3', 'B2'], // Red, Green, Blue
-  min: 0.0,
-  max: 0.3 // Typical range for good visualization, can be adjusted
-};
-var s2HectareVis = medianS2Image.clip(hectareTile);
-var s2ValuesHectare = medianS2Image.reduceRegion({
-  reducer: ee.Reducer.mean(), // Mean reflectance per band
-  geometry: hectareTile,
-  scale: 10, maxPixels: 2e9
-});
-Map.centerObject(hectareTile, 17); // Strong zoom to the tile
-Map.addLayer(hectareTile, {color: 'FFFF00'}, '1 Hectare Tile Border (S2)'); // Yellow border
-Map.addLayer(s2HectareVis, s2VisParams, 'Sentinel-2 (1 Hectare)');
 
-var worldCereal = ee.ImageCollection("ESA/WorldCereal/2021/V100").filter(ee.Filter.eq('aez_id', 6)).filter(ee.Filter.eq('product', 'temporarycrops')).filter(ee.Filter.eq('season', 'tc-annual')).first();
-var wcVisParams = {min: 0, max: 100, palette: ['black', 'green']};
-Map.addLayer(worldCereal.clip(hectareTile), wcVisParams, 'WorldCereal (1 Hectare)');
-
-
-var wcVisParams = {min: 0, max: 100, palette: ['black', 'green']};
-
-Map.addLayer(worldCereal.clip(hectareTile), wcVisParams, 'WorldCereal (1 Hectare)');
-
+// Calculate Vegetation Indices
 var ndvi = medianS2Image.normalizedDifference(['B8', 'B4']).rename('NDVI');
 var ndwi = medianS2Image.normalizedDifference(['B3', 'B8']).rename('NDWI');
 var ndcsi = medianS2Image.normalizedDifference(['B11', 'B12']).rename('NDCSI');
@@ -80,16 +130,14 @@ var ndviVisParams = {min: -1, max: 1, palette: ['red', 'yellow', 'green']};
 var ndwiVisParams = {min: -1, max: 1, palette: ['blue', 'white', 'green']};
 var ndcsiVisParams = {min: -1, max: 1, palette: ['brown', 'white', 'green']};
 
-Map.addLayer(ndvi.clip(hectareTile), ndviVisParams, 'NDVI (1 Hectare)');
-Map.addLayer(ndwi.clip(hectareTile), ndwiVisParams, 'NDWI (1 Hectare)');
-Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
-
-print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare)
+Map.addLayer(ndvi.clip(roi), ndviVisParams, 'NDVI (1 Hectare)');
+Map.addLayer(ndwi.clip(roi), ndwiVisParams, 'NDWI (1 Hectare)');
+Map.addLayer(ndcsi.clip(roi), ndcsiVisParams, 'NDCSI (1 Hectare)');
+```
 
 ![WorldCereal Layers](https://github.com/user-attachments/assets/cab1443a-e8a1-4d21-8457-c1c4fec6e26f)
 
 ![NDVI Layer](https://github.com/user-attachments/assets/e75c1d02-010d-4185-a412-1d8a262e3d51)
-```
 
 ## 3. Data Sources
 
@@ -238,17 +286,17 @@ for item in training_data['features']:
     features.append([properties['NDVI'], properties['NDWI'], properties['NDCSI']])
     labels.append(properties['crop_loss'])
 
-df = pd.DataFrame(features, columns=['NDVI', 'NDWI', 'NDCSI'])
+df = pd.DataFrame(features, columns=['NDVI'], ['NDWI'], ['NDCSI'])
 df['crop_loss'] = labels
 
 # Prepare data for LightGBM
-X = df[['NDVI', 'NDWI', 'NDCSI']]
+X = df[['NDVI'], ['NDWI'], ['NDCSI']]
 y = np.log1p(df['crop_loss'].values)  # Use log1p transformation
 
 X_train, X_validation, y_train, y_validation = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Display the correlation matrix
-correlation_matrix = df[['NDVI', 'NDWI', 'NDCSI', 'crop_loss']].corr()
+correlation_matrix = df[['NDVI'], ['NDWI'], ['NDCSI'], ['crop_loss']].corr()
 print(correlation_matrix)
 ```
 
@@ -312,7 +360,7 @@ def light_gbm_model_run(train_x, train_y, validation_x, validation_y):
 
     model_light_gbm = lgb.train(params, lg_train, 5000,
                       valid_sets=[lg_train, lg_validation],
-                      early_stopping_rounds=100,
+                      early_stopping_rounds=150,
                       verbose_eval=150,
                       evals_result=evals_result_lgbm )
 
