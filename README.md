@@ -1,6 +1,3 @@
-# CropPulse-Hackathon1
-﻿# Lightweight Geospatial ML Pipeline for Drought Stress Detection (Hackathon Guide)
-
 # Crop Loss Prediction using Sentinel-2 and LightGBM
 
 This document explains the process of predicting crop loss using Sentinel-2 satellite imagery and the LightGBM gradient boosting algorithm.
@@ -27,7 +24,7 @@ Here's a Mermaid diagram illustrating the data acquisition process:
 
 ```mermaid
 graph LR
-    A[Sentinel-2 Imagery] --> B[Region of Interest];
+    A[Sentinel-2 Imagery] --> B(Region of Interest);
     C[Crop Loss Data] --> B;
     B --> D{Combined Data};
 ```
@@ -244,6 +241,104 @@ The code performs the following steps:
 6.  Trains the LightGBM model.
 7.  Evaluates the model's performance.
 
-## 5. Conclusion
+## 5. Google Earth Engine
+
+This section provides JavaScript code to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. You can use this code in the Google Earth Engine Code Editor: https://code.earthengine.google.com
+
+```javascript
+// Initialize Earth Engine
+ee.initialize();
+
+var centerLon = 8.10; // Example longitude
+var centerLat = 51.55; // Example latitude
+var sideLengthMeters = 100;
+var halfSideMeters = sideLengthMeters / 2;
+var latOffsetDegrees = halfSideMeters / 111320;
+var lonOffsetDegrees = halfSideMeters / (111320 * Math.cos(centerLat * Math.PI/180));
+var hectareTile = ee.Geometry.Rectangle([
+  centerLon - lonOffsetDegrees, centerLat - latOffsetDegrees,
+  centerLon + lonOffsetDegrees, centerLat + latOffsetDegrees
+]);
+var s2Collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+                  .filter(ee.Filter.date('2018-05-01', '2018-05-08'))
+                  .filterBounds(hectareTile);
+function maskS2clouds(image) {
+  var qa = image.select('QA60');
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+  return image.updateMask(mask).divide(10000)
+              .select("B.*")
+              .copyProperties(image, ["system:time_start"]);
+}
+var s2CloudMasked = s2Collection.map(maskS2clouds);
+var medianS2Image = s2CloudMasked.median(); // Takes the median of each pixel over time
+
+// Calculate Vegetation Indices
+var ndvi = medianS2Image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+var ndwi = medianS2Image.normalizedDifference(['B3', 'B8']).rename('NDWI');
+var ndcsi = medianS2Image.normalizedDifference(['B11', 'B12']).rename('NDCSI');
+
+var s2VisParams = {
+  bands: ['B4', 'B3', 'B2'], // Red, Green, Blue
+  min: 0.0,
+  max: 0.3 // Typical range for good visualization, can be adjusted
+};
+
+var ndviVisParams = {min: -1, max: 1, palette: ['red', 'yellow', 'green']};
+var ndwiVisParams = {min: -1, max: 1, palette: ['blue', 'white', 'green']};
+var ndcsiVisParams = {min: -1, max: 1, palette: ['brown', 'white', 'green']};
+
+var s2HectareVis = medianS2Image.clip(hectareTile);
+var s2ValuesHectare = medianS2Image.reduceRegion({
+  reducer: ee.Reducer.mean(), // Mean reflectance per band
+  geometry: hectareTile,
+  scale: 10, maxPixels: 1e9
+});
+Map.centerObject(hectareTile, 17); // Strong zoom to the tile
+Map.addLayer(hectareTile, {color: 'FFFF00'}, '1 Hectare Tile Border (S2)'); // Yellow border
+Map.addLayer(s2HectareVis, s2VisParams, 'Sentinel-2 (1 Hectare)');
+Map.addLayer(ndvi.clip(hectareTile), ndviVisParams, 'NDVI (1 Hectare)');
+Map.addLayer(ndwi.clip(hectareTile), ndwiVisParams, 'NDWI (1 Hectare)');
+Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
+
+print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare);
+```
+
+**Example 1: Displaying NDVI**
+
+This example shows how to display the NDVI layer.
+
+```javascript
+Map.addLayer(ndvi.clip(hectareTile), ndviVisParams, 'NDVI (1 Hectare)');
+```
+
+**Example 2: Displaying NDWI**
+
+This example shows how to display the NDWI layer.
+
+```javascript
+Map.addLayer(ndwi.clip(hectareTile), ndwiVisParams, 'NDWI (1 Hectare)');
+```
+
+**Example 3: Displaying NDCSI**
+
+This example shows how to display the NDCSI layer.
+
+```javascript
+Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
+```
+
+This JavaScript code performs the following steps:
+
+1.  Initializes the Earth Engine JavaScript API.
+2.  Defines the region of interest.
+3.  Centers the map on the region of interest.
+4.  Loads Sentinel-2 data for the specified time period and region.
+5.  Calculates NDVI, NDWI, and NDCSI.
+6.  Adds the Sentinel-2 image and the vegetation index layers to the map.
+
+## 6. Conclusion
 
 This document provides an overview of the crop loss prediction process using Sentinel-2 imagery and the LightGBM algorithm. By combining remote sensing data and machine learning, we can develop effective tools for monitoring crop health and predicting potential losses.
