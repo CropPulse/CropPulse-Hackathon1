@@ -6,7 +6,7 @@ This document explains the process of predicting crop loss using Sentinel-2 sate
 
 Crop loss prediction is crucial for food security and agricultural planning. By leveraging remote sensing data and machine learning, we can estimate potential crop losses before harvest, enabling timely interventions.
 
-## 5. Google Earth Engine
+## 2. Google Earth Engine
 
 This section provides JavaScript code to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. You can use this code in the Google Earth Engine Code Editor: https://code.earthengine.google.com
 
@@ -104,16 +104,16 @@ This JavaScript code performs the following steps:
 5.  Calculates NDVI, NDWI, and NDCSI.
 6.  Adds the Sentinel-2 image and the vegetation index layers to the map.
 
-## 2. Data Sources
+## 3. Data Sources
 
 *   **Sentinel-2:** Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high-resolution optical imagery of the Earth's surface. We use Sentinel-2 data to extract vegetation indices that are indicative of crop health.
 *   **Crop Loss Data:** This is the ground truth data representing actual crop losses in the region of interest. This data is essential for training the machine learning model.
 
-## 3. Methodology
+## 4. Methodology
 
 The crop loss prediction process involves the following steps:
 
-### 3.1. Data Acquisition
+### 4.1. Data Acquisition
 
 *   **Sentinel-2 Data:** We acquire Sentinel-2 imagery for the region of interest (Nord Rhine-Westphalia in this case) and a specific time period (e.g., 2020-2021).
 *   **Crop Loss Data:** We obtain crop loss data for the same region and time period. This data should ideally be in a format that can be linked to the Sentinel-2 imagery (e.g., by location).
@@ -147,7 +147,7 @@ end_date = '2021-12-31'
 sentinel2 = ee.ImageCollection('COPERNICUS/S2_SR').filterDate(start_date, end_date).filterBounds(roi)
 ```
 
-### 3.2. Feature Extraction
+### 4.2. Feature Extraction
 
 We extract the following vegetation indices from the Sentinel-2 imagery:
 
@@ -178,7 +178,7 @@ def calculate_ndvi(image):
 
 def calculate_ndwi(image):
     ndwi = image.normalizedDifference(['B3', 'B8']).rename('NDWI')
-    return image.addBands(ndwi)
+    return image.addBands(ndvi)
 
 def calculate_ndcsi(image):
     ndcsi = image.normalizedDifference(['B11', 'B12']).rename('NDCSI')
@@ -189,7 +189,7 @@ sentinel2_ndwi = sentinel2.map(calculate_ndwi)
 sentinel2_ndcsi = sentinel2.map(calculate_ndcsi)
 ```
 
-### 3.3. Data Preparation
+### 4.3. Data Preparation
 
 *   We combine the extracted vegetation indices with the crop loss data to create a training dataset.
 *   The data is structured into a pandas DataFrame, with the vegetation indices as features and the crop loss as the target variable.
@@ -238,7 +238,7 @@ correlation_matrix = df[['NDVI', 'NDWI', 'NDCSI', 'crop_loss']].corr()
 print(correlation_matrix)
 ```
 
-### 3.4. Model Training
+### 4.4. Model Training
 
 We use the LightGBM (Light Gradient Boosting Machine) algorithm to train a predictive model.
 
@@ -302,7 +302,7 @@ predictions_test_y_light_gbm, model_lgbm, evals_result = light_gbm_model_run(X_t
 print('Output of LightGBM Model training..')
 ```
 
-### 3.5. Model Evaluation
+### 4.5. Model Evaluation
 
 We evaluate the model's performance using the Mean Squared Error (MSE) metric. MSE measures the average squared difference between the predicted crop losses and the actual crop losses.
 
@@ -324,7 +324,7 @@ mse = mean_squared_error(np.expm1(y_validation), predictions_test_y_light_gbm)
 print('Mean Squared Error:', mse)
 ```
 
-## 4. Code Implementation
+## 5. Code Implementation
 
 The Python code uses the following libraries:
 
@@ -342,104 +342,6 @@ The code performs the following steps:
 5.  Prepares the data for LightGBM.
 6.  Trains the LightGBM model.
 7.  Evaluates the model's performance.
-
-## 5. Google Earth Engine
-
-This section provides JavaScript code to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. You can use this code in the Google Earth Engine Code Editor: https://code.earthengine.google.com
-
-```javascript
-// Initialize Earth Engine
-ee.initialize();
-
-var centerLon = 8.10; // Example longitude
-var centerLat = 51.55; // Example latitude
-var sideLengthMeters = 100;
-var halfSideMeters = sideLengthMeters / 2;
-var latOffsetDegrees = halfSideMeters / 111320;
-var lonOffsetDegrees = halfSideMeters / (111320 * Math.cos(centerLat * Math.PI/180));
-var hectareTile = ee.Geometry.Rectangle([
-  centerLon - lonOffsetDegrees, centerLat - latOffsetDegrees,
-  centerLon + lonOffsetDegrees, centerLat + latOffsetDegrees
-]);
-var s2Collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
-                  .filter(ee.Filter.date('2018-05-01', '2018-05-08'))
-                  .filterBounds(hectareTile);
-function maskS2clouds(image) {
-  var qa = image.select('QA60');
-  var cloudBitMask = 1 << 10;
-  var cirrusBitMask = 1 << 11;
-  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
-      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
-  return image.updateMask(mask).divide(10000)
-              .select("B.*")
-              .copyProperties(image, ["system:time_start"]);
-}
-var s2CloudMasked = s2Collection.map(maskS2clouds);
-var medianS2Image = s2CloudMasked.median(); // Takes the median of each pixel over time
-
-// Calculate Vegetation Indices
-var ndvi = medianS2Image.normalizedDifference(['B8', 'B4']).rename('NDVI');
-var ndwi = medianS2Image.normalizedDifference(['B3', 'B8']).rename('NDWI');
-var ndcsi = medianS2Image.normalizedDifference(['B11', 'B12']).rename('NDCSI');
-
-var s2VisParams = {
-  bands: ['B4', 'B3', 'B2'], // Red, Green, Blue
-  min: 0.0,
-  max: 0.3 // Typical range for good visualization, can be adjusted
-};
-
-var ndviVisParams = {min: -1, max: 1, palette: ['red', 'yellow', 'green']};
-var ndwiVisParams = {min: -1, max: 1, palette: ['blue', 'white', 'green']};
-var ndcsiVisParams = {min: -1, max: 1, palette: ['brown', 'white', 'green']};
-
-var s2HectareVis = medianS2Image.clip(hectareTile);
-var s2ValuesHectare = medianS2Image.reduceRegion({
-  reducer: ee.Reducer.mean(), // Mean reflectance per band
-  geometry: hectareTile,
-  scale: 10, maxPixels: 1e9
-});
-Map.centerObject(hectareTile, 17); // Strong zoom to the tile
-Map.addLayer(hectareTile, {color: 'FFFF00'}, '1 Hectare Tile Border (S2)'); // Yellow border
-Map.addLayer(s2HectareVis, s2VisParams, 'Sentinel-2 (1 Hectare)');
-Map.addLayer(ndvi.clip(hectareTile), ndviVisParams, 'NDVI (1 Hectare)');
-Map.addLayer(ndwi.clip(hectareTile), ndwiVisParams, 'NDWI (1 Hectare)');
-Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
-
-print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare);
-```
-
-**Example 1: Displaying NDVI**
-
-This example shows how to display the NDVI layer.
-
-```javascript
-Map.addLayer(ndvi.clip(hectareTile), ndviVisParams, 'NDVI (1 Hectare)');
-```
-
-**Example 2: Displaying NDWI**
-
-This example shows how to display the NDWI layer.
-
-```javascript
-Map.addLayer(ndwi.clip(hectareTile), ndwiVisParams, 'NDWI (1 Hectare)');
-```
-
-**Example 3: Displaying NDCSI**
-
-This example shows how to display the NDCSI layer.
-
-```javascript
-Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
-```
-
-This JavaScript code performs the following steps:
-
-1.  Initializes the Earth Engine JavaScript API.
-2.  Defines the region of interest.
-3.  Centers the map on the region of interest.
-4.  Loads Sentinel-2 data for the specified time period and region.
-5.  Calculates NDVI, NDWI, and NDCSI.
-6.  Adds the Sentinel-2 image and the vegetation index layers to the map.
 
 ## 6. Conclusion
 
