@@ -82,6 +82,10 @@ Map.addLayer(ndwi.clip(hectareTile), ndwiVisParams, 'NDWI (1 Hectare)');
 Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
 
 print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare)
+
+![WorldCereal Layers](https://github.com/user-attachments/assets/cab1443a-e8a1-4d21-8457-c1c4fec6e26f)
+
+![NDVI Layer](https://github.com/user-attachments/assets/e75c1d02-010d-4185-a412-1d8a262e3d51)
 ```
 
 ## 3. Data Sources
