@@ -106,8 +106,8 @@ graph LR
     C[NDWI] --> B;
     D[NDCSI] --> B;
     B --> E[Pandas DataFrame];
-    E --> F{Log Transformation (np.log1p)};
-    F --> G{Train/Validation Split};
+    E --> F(Log Transformation);
+    F -->|Split| G(Train/Validation Split);
 ```
 
 **Code Example:**
@@ -134,6 +134,10 @@ X = df[['NDVI', 'NDWI', 'NDCSI']]
 y = np.log1p(df['crop_loss'].values)  # Use log1p transformation
 
 X_train, X_validation, y_train, y_validation = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Display the correlation matrix
+correlation_matrix = df[['NDVI', 'NDWI', 'NDCSI', 'crop_loss']].corr()
+print(correlation_matrix)
 ```
 
 ### 3.4. Model Training
