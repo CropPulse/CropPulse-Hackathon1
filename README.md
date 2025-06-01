@@ -140,7 +140,11 @@ Map.addLayer(ndcsi.clip(roi), ndcsiVisParams, 'NDCSI (1 Hectare)');
 ```
 ![grafik](https://github.com/user-attachments/assets/1e1a7f72-e49e-4aa9-924b-c90ecad936d1)
 > layer parameters
-> 
+
+
+![grafik](https://github.com/user-attachments/assets/80d19a1a-7a9f-4187-96f7-bd7bc513f5a2)
+> region of interest (roi)
+
 ## 3. Data Sources
 
 *   **Sentinel-2:** Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high-resolution optical imagery of the Earth's surface. We use Sentinel-2 data to extract vegetation indices that are indicative of crop health.
