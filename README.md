@@ -27,7 +27,7 @@ Here's a Mermaid diagram illustrating the data acquisition process:
 
 ```mermaid
 graph LR
-    A[Sentinel-2 Imagery] --> B(Region of Interest);
+    A[Sentinel-2 Imagery] --> B[Region of Interest];
     C[Crop Loss Data] --> B;
     B --> D{Combined Data};
 ```
