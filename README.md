@@ -18,7 +18,8 @@ Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high
 *   **NDWI (Normalized Difference Water Index):** A measure of vegetation water content, calculated as (Green - NIR) / (Green + NIR), where Green is the green band (B3) and NIR is the near-infrared band (B8). NDWI values range from -1 to 1, with higher values indicating greater vegetation water content.
 *   **NDCSI (Normalized Difference Clay Soil Index):** A measure of clay mineral content, calculated as (SWIR1 - SWIR2) / (SWIR1 + SWIR2), where SWIR1 is the shortwave infrared band (B11) and SWIR2 is the shortwave infrared band (B12). NDCSI values range from -1 to 1.
 
-> ![grafik](https://github.com/user-attachments/assets/232c1c82-35f4-42f6-b0dd-ddf0d9850598)
+ ![grafik](https://github.com/user-attachments/assets/232c1c82-35f4-42f6-b0dd-ddf0d9850598)
+
 > layers in earth engine web interface
  
 The "WorldCereal 10 m 2021" product suite from the European Space Agency (ESA) consists of annual and seasonal cereal maps at a global level and the associated confidence intervals. These were generated as part of the ESA-WorldCereal project.
