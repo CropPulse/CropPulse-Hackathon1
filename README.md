@@ -63,7 +63,10 @@ Map.centerObject(hectareTile, 17); // Strong zoom to the tile
 Map.addLayer(hectareTile, {color: 'FFFF00'}, '1 Hectare Tile Border (S2)'); // Yellow border
 Map.addLayer(s2HectareVis, s2VisParams, 'Sentinel-2 (1 Hectare)');
 
-var worldCereal = ee.ImageCollection("ESA/WorldCereal/2021/V100").filter(ee.Filter.eq('aez_id', 6)).filter(ee.Filter.eq('product', 'temporarycrops')).filter(ee.Filter.eq('season', 'tc-annual')).first()
+var worldCereal = ee.ImageCollection("ESA/WorldCereal/2021/V100").filter(ee.Filter.eq('aez_id', 6)).filter(ee.Filter.eq('product', 'temporarycrops')).filter(ee.Filter.eq('season', 'tc-annual')).first();
+var wcVisParams = {min: 0, max: 100, palette: ['black', 'green']};
+Map.addLayer(worldCereal.clip(hectareTile), wcVisParams, 'WorldCereal (1 Hectare)');
+
 
 var wcVisParams = {min: 0, max: 100, palette: ['black', 'green']};
 
