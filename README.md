@@ -21,8 +21,8 @@ Sentinel-2 is a European Space Agency (ESA) satellite mission that provides high
 The following JavaScript code shows how to display the region of interest and the extracted layers with vegetation indices using the Google Earth Engine API. This code needs to be adapted to properly display our layers.
 
 ```javascript
-var centerLon = 8.10; // Example longitude
-var centerLat = 51.55; // Example latitude
+var centerLon = 8.00; // Example longitude
+var centerLat = 50.00; // Example latitude
 var sideLengthMeters = 100;
 var halfSideMeters = sideLengthMeters / 2;
 var latOffsetDegrees = halfSideMeters / 111320;
@@ -57,7 +57,7 @@ var s2HectareVis = medianS2Image.clip(hectareTile);
 var s2ValuesHectare = medianS2Image.reduceRegion({
   reducer: ee.Reducer.mean(), // Mean reflectance per band
   geometry: hectareTile,
-  scale: 10, maxPixels: 1e9
+  scale: 10, maxPixels: 2e9
 });
 Map.centerObject(hectareTile, 17); // Strong zoom to the tile
 Map.addLayer(hectareTile, {color: 'FFFF00'}, '1 Hectare Tile Border (S2)'); // Yellow border
