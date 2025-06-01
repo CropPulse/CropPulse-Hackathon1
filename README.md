@@ -220,17 +220,8 @@ We extract the following vegetation indices from the Sentinel-2 imagery:
 
 These indices provide information about the health and condition of the crops.
 
-Here's a Mermaid diagram illustrating the feature extraction process:
+![grafik](https://github.com/user-attachments/assets/eb4b992a-ca42-48ab-84b2-eea50c434420)
 
-```mermaid
-graph LR
-    A[Sentinel-2 Bands] --> B{NDVI Calculation};
-    A --> C{NDWI Calculation};
-    A --> D{NDCSI Calculation};
-    B --> E[NDVI];
-    C --> F[NDWI];
-    D --> G[NDCSI];
-```
 
 **Code Example:**
 
