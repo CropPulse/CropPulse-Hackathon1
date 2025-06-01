@@ -49,22 +49,11 @@ function maskS2clouds(image) {
 }
 var s2CloudMasked = s2Collection.map(maskS2clouds);
 var medianS2Image = s2CloudMasked.median(); // Takes the median of each pixel over time
-
-// Calculate Vegetation Indices
-var ndvi = medianS2Image.normalizedDifference(['B8', 'B4']).rename('NDVI');
-var ndwi = medianS2Image.normalizedDifference(['B3', 'B8']).rename('NDWI');
-var ndcsi = medianS2Image.normalizedDifference(['B11', 'B12']).rename('NDCSI');
-
 var s2VisParams = {
   bands: ['B4', 'B3', 'B2'], // Red, Green, Blue
   min: 0.0,
   max: 0.3 // Typical range for good visualization, can be adjusted
 };
-
-var ndviVisParams = {min: -1, max: 1, palette: ['red', 'yellow', 'green']};
-var ndwiVisParams = {min: -1, max: 1, palette: ['blue', 'white', 'green']};
-var ndcsiVisParams = {min: -1, max: 1, palette: ['brown', 'white', 'green']};
-
 var s2HectareVis = medianS2Image.clip(hectareTile);
 var s2ValuesHectare = medianS2Image.reduceRegion({
   reducer: ee.Reducer.mean(), // Mean reflectance per band
@@ -74,45 +63,8 @@ var s2ValuesHectare = medianS2Image.reduceRegion({
 Map.centerObject(hectareTile, 17); // Strong zoom to the tile
 Map.addLayer(hectareTile, {color: 'FFFF00'}, '1 Hectare Tile Border (S2)'); // Yellow border
 Map.addLayer(s2HectareVis, s2VisParams, 'Sentinel-2 (1 Hectare)');
-Map.addLayer(ndvi.clip(hectareTile), ndviVisParams, 'NDVI (1 Hectare)');
-Map.addLayer(ndwi.clip(hectareTile), ndwiVisParams, 'NDWI (1 Hectare)');
-Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
-
-print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare);
+print('Mean Sentinel-2 reflectance values in 1-hectare tile:', s2ValuesHectare)
 ```
-
-**Example 1: Displaying NDVI**
-
-This example shows how to display the NDVI layer.
-
-```javascript
-Map.addLayer(ndvi.clip(hectareTile), ndviVisParams, 'NDVI (1 Hectare)');
-```
-
-**Example 2: Displaying NDWI**
-
-This example shows how to display the NDWI layer.
-
-```javascript
-Map.addLayer(ndwi.clip(hectareTile), ndwiVisParams, 'NDWI (1 Hectare)');
-```
-
-**Example 3: Displaying NDCSI**
-
-This example shows how to display the NDCSI layer.
-
-```javascript
-Map.addLayer(ndcsi.clip(hectareTile), ndcsiVisParams, 'NDCSI (1 Hectare)');
-```
-
-This JavaScript code performs the following steps:
-
-1.  Initializes the Earth Engine JavaScript API.
-2.  Defines the region of interest.
-3.  Centers the map on the region of interest.
-4.  Loads Sentinel-2 data for the specified time period and region.
-5.  Calculates NDVI, NDWI, and NDCSI.
-6.  Adds the Sentinel-2 image and the vegetation index layers to the map.
 
 ## 3. Data Sources
 
